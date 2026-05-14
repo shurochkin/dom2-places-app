@@ -49,6 +49,63 @@ export type TelegramHandle = {
   setClosingConfirmation(enable: boolean): void;
 };
 
+export const BOT_USERNAME = "lebedev_places_bot";
+
+export function getUserFirstName(): string | null {
+  return globalThis.window?.Telegram?.WebApp?.initDataUnsafe?.user?.first_name ?? null;
+}
+
+export function shareViaTelegram(text: string): boolean {
+  const tg = globalThis.window?.Telegram?.WebApp;
+  const botUrl = `https://t.me/${BOT_USERNAME}`;
+  const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(botUrl)}&text=${encodeURIComponent(text)}`;
+  if (tg && typeof (tg as unknown as { openTelegramLink?: (url: string) => void }).openTelegramLink === "function") {
+    (tg as unknown as { openTelegramLink: (url: string) => void }).openTelegramLink(shareUrl);
+    return true;
+  }
+  // Browser fallback — opens Telegram in a new tab if installed.
+  if (typeof window !== "undefined") {
+    window.open(shareUrl, "_blank", "noopener");
+    return true;
+  }
+  return false;
+}
+
+export function readClipboard(): Promise<string | null> {
+  const tg = globalThis.window?.Telegram?.WebApp as
+    | (TelegramWebApp & {
+        readTextFromClipboard?: (cb: (text: string) => void) => void;
+      })
+    | undefined;
+  if (tg && typeof tg.readTextFromClipboard === "function") {
+    return new Promise((resolve) => {
+      // Telegram fires the callback with "" if the clipboard is empty or
+      // permission was denied; treat both as "no data".
+      try {
+        tg.readTextFromClipboard!((text) => resolve(text || null));
+      } catch {
+        resolve(null);
+      }
+    });
+  }
+  if (typeof navigator !== "undefined" && navigator.clipboard?.readText) {
+    return navigator.clipboard.readText().then((t) => t || null).catch(() => null);
+  }
+  return Promise.resolve(null);
+}
+
+export async function writeClipboard(text: string): Promise<boolean> {
+  if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
 export async function initTelegram(): Promise<TelegramHandle> {
   const tg = await waitForTelegram();
   // Empty initData means the SDK loaded as a regular script but the host is

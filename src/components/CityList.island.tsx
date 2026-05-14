@@ -9,6 +9,8 @@ import {
 import { initTelegram } from "../lib/telegram";
 import { HeaderBar } from "./HeaderBar";
 import { CityRow } from "./CityRow";
+import { ShareDialog } from "./ShareDialog";
+import { CompareDialog } from "./CompareDialog";
 
 const ROW_HEIGHT = 56;
 const OVERSCAN = 6;
@@ -17,6 +19,8 @@ export function CityList() {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
   const isReady = ready.value;
   const indices = visibleIndices.value;
   const inTelegram = inTelegramSignal.value;
@@ -65,7 +69,14 @@ export function CityList() {
 
   return (
     <div class="app">
-      <HeaderBar />
+      <HeaderBar
+        onShare={() => setShareOpen(true)}
+        onCompare={() => setCompareOpen(true)}
+      />
+      {shareOpen ? <ShareDialog onClose={() => setShareOpen(false)} /> : null}
+      {compareOpen ? (
+        <CompareDialog onClose={() => setCompareOpen(false)} />
+      ) : null}
       {!inTelegram ? (
         <div class="banner">
           Вы открыли страницу вне Telegram — отметки сохраняются только в этом

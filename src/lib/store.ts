@@ -1,7 +1,9 @@
 import { signal, computed, effect, batch } from "@preact/signals";
 import { CITIES, CITY_COUNT, type City } from "../data/cities";
 import {
+  decodeShareCode,
   emptyState,
+  encodeShareCode,
   isVisited,
   setVisited as setVisitedFlag,
   visitedCount,
@@ -86,6 +88,56 @@ export async function bootstrapStore(): Promise<void> {
 
 export function getCity(idx: number): City {
   return CITIES[idx]!;
+}
+
+// --- friend comparison mode -----------------------------------------------
+
+export const compareState = signal<State | null>(null);
+export const compareName = signal<string | null>(null);
+
+export function isFriendVisited(idx: number): boolean {
+  const s = compareState.value;
+  return s ? isVisited(s, idx) : false;
+}
+
+export const compareStats = computed(() => {
+  rev.value;
+  const friend = compareState.value;
+  if (!friend) return null;
+  let common = 0;
+  let onlyMine = 0;
+  let onlyFriend = 0;
+  for (let i = 0; i < CITY_COUNT; i++) {
+    const mine = isVisited(state, i);
+    const theirs = isVisited(friend, i);
+    if (mine && theirs) common++;
+    else if (mine) onlyMine++;
+    else if (theirs) onlyFriend++;
+  }
+  return { common, onlyMine, onlyFriend, friendTotal: visitedCount(friend) };
+});
+
+export function buildShareCode(displayName?: string | null): string {
+  return encodeShareCode(state, displayName ?? null);
+}
+
+export function enterCompareMode(code: string): { ok: true; name: string | null } | { ok: false; reason: string } {
+  const decoded = decodeShareCode(CITY_COUNT, code);
+  if (!decoded) return { ok: false, reason: "Не удалось разобрать код. Проверьте, что скопировали целиком." };
+  batch(() => {
+    compareState.value = decoded.state;
+    compareName.value = decoded.name;
+    rev.value = rev.value + 1;
+  });
+  return { ok: true, name: decoded.name };
+}
+
+export function exitCompareMode(): void {
+  batch(() => {
+    compareState.value = null;
+    compareName.value = null;
+    rev.value = rev.value + 1;
+  });
 }
 
 // Watch for save status changes to drive the closing-confirmation flag.

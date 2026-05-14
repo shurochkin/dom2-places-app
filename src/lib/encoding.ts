@@ -167,6 +167,58 @@ export function parseStateValue(raw: string): Unpacked {
   return { mode: "single", mask, years: rest };
 }
 
+// --- share codec (for friend comparison) ---
+//
+// Encodes a user's whole state into a single string that fits into a Telegram
+// chat message (~300–500 chars typical). Format:
+//   lbdv1.<encName>.<maskB64>.<yearsCsv>
+// encName: encodeURIComponent(name) with dots double-escaped so the dot
+// delimiter is unambiguous; mask: same base64url bitmask used in CloudStorage;
+// years: same idx36:yroff36 csv as the storage format.
+
+export const SHARE_PREFIX = "lbdv1.";
+
+export function encodeShareCode(state: State, name?: string | null): string {
+  const mask = b64urlEncode(state.visited);
+  const entries = [...state.years.entries()].sort((a, b) => a[0] - b[0]);
+  const years = encodeYearPairs(entries);
+  const encName = name ? encodeURIComponent(name).replace(/\./g, "%2E") : "";
+  return `${SHARE_PREFIX}${encName}.${mask}.${years}`;
+}
+
+export type DecodedShare = { name: string | null; state: State };
+
+export function decodeShareCode(cityCount: number, raw: string): DecodedShare | null {
+  const s = raw.trim();
+  if (!s.startsWith(SHARE_PREFIX)) return null;
+  const body = s.slice(SHARE_PREFIX.length);
+  const firstDot = body.indexOf(".");
+  if (firstDot < 0) return null;
+  const encName = body.slice(0, firstDot);
+  const rest = body.slice(firstDot + 1);
+  const secondDot = rest.indexOf(".");
+  if (secondDot < 0) return null;
+  const mask = rest.slice(0, secondDot);
+  const years = rest.slice(secondDot + 1);
+  if (!mask) return null;
+
+  let name: string | null = null;
+  if (encName) {
+    try { name = decodeURIComponent(encName); } catch { return null; }
+  }
+
+  const state = emptyState(cityCount);
+  try {
+    state.visited = b64urlDecode(mask, Math.ceil(cityCount / 8));
+  } catch {
+    return null;
+  }
+  for (const [idx, year] of decodeYearPairs(years)) {
+    if (idx >= 0 && idx < cityCount) state.years.set(idx, year);
+  }
+  return { name, state };
+}
+
 export function unpack(
   cityCount: number,
   stateRaw: string | undefined,
