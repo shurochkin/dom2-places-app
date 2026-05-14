@@ -13,8 +13,10 @@ export const YEAR_EPOCH = 1900;
 export const VALUE_CHAR_LIMIT = 4096; // Telegram CloudStorage limit
 export const SHARD_THRESHOLD = 3900; // leave headroom under the limit
 export const MAX_SHARDS = 4;
-export const STATE_KEY = "v1:state";
-export const SHARD_PREFIX = "v1:y:";
+// Telegram CloudStorage restricts keys to `[A-Za-z0-9_-]` — colons are
+// rejected silently, which is what made every save fail in production.
+export const STATE_KEY = "v1_state";
+export const SHARD_PREFIX = "v1_y_";
 
 export type State = {
   visited: Uint8Array; // bitmask, length = ceil(N/8)
