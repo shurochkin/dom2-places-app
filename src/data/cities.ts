@@ -6,6 +6,8 @@ export type City = {
   readonly name: string;
   readonly country: string | null;
   readonly slug: string;
+  readonly lat: number | null;
+  readonly lon: number | null;
 };
 
 // Source of truth for the city list. APPEND-ONLY: never reorder, never

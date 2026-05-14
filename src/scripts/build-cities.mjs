@@ -3,12 +3,13 @@
 // country in parentheses, assigns stable index ids, and disambiguates slugs
 // for duplicate display names (e.g. "Гранада", "Портленд", "Сен-Пьер").
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const RAW_PATH = join(__dirname, "..", "data", "cities.raw.txt");
+const GEO_PATH = join(__dirname, "..", "data", "cities.geo.json");
 const OUT_PATH = join(__dirname, "..", "data", "cities.generated.json");
 
 const TRANSLIT = {
@@ -43,7 +44,7 @@ function main() {
     const m = entry.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
     const name = (m ? m[1] : entry).trim();
     const country = m ? m[2].trim() : null;
-    return { idx, rank: idx + 1, name, country, slug: slugify(name) };
+    return { idx, rank: idx + 1, name, country, slug: slugify(name), lat: null, lon: null };
   });
 
   // Disambiguate slugs for repeated names.
@@ -69,8 +70,24 @@ function main() {
     allSlugs.add(c.slug);
   }
 
+  // Merge geocoded coordinates if cached.
+  let withGeo = 0;
+  if (existsSync(GEO_PATH)) {
+    const geo = JSON.parse(readFileSync(GEO_PATH, "utf8"));
+    for (const c of cities) {
+      const g = geo[c.slug];
+      if (g && typeof g.lat === "number" && typeof g.lon === "number") {
+        c.lat = g.lat;
+        c.lon = g.lon;
+        withGeo++;
+      }
+    }
+  }
+
   writeFileSync(OUT_PATH, JSON.stringify(cities, null, 0) + "\n");
-  console.log(`Wrote ${cities.length} cities to ${OUT_PATH}`);
+  console.log(
+    `Wrote ${cities.length} cities to ${OUT_PATH} (${withGeo} with coordinates)`,
+  );
 }
 
 main();

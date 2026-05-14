@@ -16,9 +16,12 @@ import { createStorage, type StorageAdapter } from "./storage";
 const rev = signal(0);
 let state: State = emptyState(CITY_COUNT);
 
+export type View = "list" | "map";
+
 export const ready = signal(false);
 export const inTelegramSignal = signal(false);
 export const searchQuery = signal("");
+export const currentView = signal<View>("list");
 
 let storage: StorageAdapter | null = null;
 export const saveStatus = computed<"idle" | "saving" | "error" | "saved">(() => {

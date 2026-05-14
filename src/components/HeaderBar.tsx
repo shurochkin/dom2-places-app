@@ -2,6 +2,7 @@ import {
   compareName,
   compareState,
   compareStats,
+  currentView,
   exitCompareMode,
   saveStatus,
   searchQuery,
@@ -26,6 +27,7 @@ export function HeaderBar({ onShare, onCompare }: Props) {
   const friend = compareState.value;
   const friendName = compareName.value;
   const cmp = compareStats.value;
+  const view = currentView.value;
 
   return (
     <header class="header">
@@ -39,14 +41,38 @@ export function HeaderBar({ onShare, onCompare }: Props) {
           {STATUS_LABEL[status]}
         </div>
       </div>
-      <input
-        type="search"
-        class="header__search"
-        placeholder="Поиск города"
-        value={searchQuery.value}
-        onInput={(e) => (searchQuery.value = (e.target as HTMLInputElement).value)}
-        aria-label="Поиск города"
-      />
+      <div class="header__tabs" role="tablist">
+        <button
+          type="button"
+          class="tab"
+          data-active={view === "list" ? "1" : "0"}
+          role="tab"
+          aria-selected={view === "list"}
+          onClick={() => (currentView.value = "list")}
+        >
+          Список
+        </button>
+        <button
+          type="button"
+          class="tab"
+          data-active={view === "map" ? "1" : "0"}
+          role="tab"
+          aria-selected={view === "map"}
+          onClick={() => (currentView.value = "map")}
+        >
+          Карта
+        </button>
+      </div>
+      {view === "list" ? (
+        <input
+          type="search"
+          class="header__search"
+          placeholder="Поиск города"
+          value={searchQuery.value}
+          onInput={(e) => (searchQuery.value = (e.target as HTMLInputElement).value)}
+          aria-label="Поиск города"
+        />
+      ) : null}
       {friend && cmp ? (
         <div class="header__compare">
           <div class="header__compare-title">

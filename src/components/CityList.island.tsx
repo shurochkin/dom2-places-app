@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import {
   bindClosingConfirmation,
   bootstrapStore,
+  currentView,
   inTelegramSignal,
   ready,
   visibleIndices,
@@ -11,6 +12,7 @@ import { HeaderBar } from "./HeaderBar";
 import { CityRow } from "./CityRow";
 import { ShareDialog } from "./ShareDialog";
 import { CompareDialog } from "./CompareDialog";
+import { MapView } from "./MapView";
 
 const ROW_HEIGHT = 56;
 const OVERSCAN = 6;
@@ -24,6 +26,7 @@ export function CityList() {
   const isReady = ready.value;
   const indices = visibleIndices.value;
   const inTelegram = inTelegramSignal.value;
+  const view = currentView.value;
 
   useEffect(() => {
     let cancelled = false;
@@ -86,6 +89,7 @@ export function CityList() {
       <div
         ref={scrollerRef}
         class="scroller"
+        style={view === "map" ? { display: "none" } : undefined}
         onScroll={(e) => setScrollTop((e.target as HTMLElement).scrollTop)}
       >
         {total === 0 ? (
@@ -107,6 +111,9 @@ export function CityList() {
             ))}
           </div>
         )}
+      </div>
+      <div class="map-wrap" style={view === "list" ? { display: "none" } : undefined}>
+        <MapView active={view === "map"} />
       </div>
     </div>
   );
