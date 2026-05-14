@@ -1,0 +1,57 @@
+---
+import "../styles/global.css";
+import { CityList } from "../components/CityList.island";
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Места Лебедева</title>
+    <meta name="description" content="Отметьте города из рейтинга интересности Артемия Лебедева, в которых вы бывали." />
+    <script src="https://telegram.org/js/telegram-web-app.js" is:inline></script>
+    <script is:inline>
+      // Inline theme bootstrap to avoid FOUC. The Preact island re-applies
+      // these later via initTelegram(), but doing it here means the page
+      // already renders in the right colors on cold open.
+      (function () {
+        try {
+          var tg = window.Telegram && window.Telegram.WebApp;
+          if (!tg) return;
+          var p = tg.themeParams || {};
+          var map = {
+            bg_color: "--tg-bg",
+            text_color: "--tg-text",
+            hint_color: "--tg-hint",
+            link_color: "--tg-link",
+            button_color: "--tg-button",
+            button_text_color: "--tg-button-text",
+            secondary_bg_color: "--tg-secondary-bg",
+            header_bg_color: "--tg-header-bg",
+            accent_text_color: "--tg-accent",
+            section_bg_color: "--tg-section-bg",
+            section_header_text_color: "--tg-section-header",
+            subtitle_text_color: "--tg-subtitle",
+            destructive_text_color: "--tg-destructive",
+          };
+          var root = document.documentElement;
+          for (var k in map) if (p[k]) root.style.setProperty(map[k], p[k]);
+          if (tg.colorScheme) root.dataset.theme = tg.colorScheme;
+          if (tg.viewportStableHeight)
+            root.style.setProperty("--tg-vsh", tg.viewportStableHeight + "px");
+        } catch (e) {
+          /* fail silently — island still works */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="app">
+      <CityList client:only="preact" />
+    </div>
+  </body>
+</html>

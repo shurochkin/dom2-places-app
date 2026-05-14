@@ -1,0 +1,23 @@
+{
+  "name": "lebedev-places",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run build:cities && astro build",
+    "preview": "astro preview",
+    "build:cities": "node src/scripts/build-cities.mjs",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/preact": "^4.0.13",
+    "@preact/signals": "^2.0.4",
+    "astro": "^5.13.7",
+    "preact": "^10.27.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
