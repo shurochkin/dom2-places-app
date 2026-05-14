@@ -1,0 +1,6 @@
+{
+  "bombey": { "lat": 19.076, "lon": 72.8777, "note": "Bombay → Mumbai" },
+  "saygon": { "lat": 10.8231, "lon": 106.6297, "note": "Saigon → Ho Chi Minh City" },
+  "kalkutta": { "lat": 22.5726, "lon": 88.3639, "note": "Calcutta → Kolkata; Open-Meteo returns a Kerala village otherwise" },
+  "kanton": { "lat": 23.1291, "lon": 113.2644, "note": "Canton → Guangzhou (Lebedev's historical naming)" }
+}

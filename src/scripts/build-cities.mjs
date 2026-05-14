@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const RAW_PATH = join(__dirname, "..", "data", "cities.raw.txt");
 const GEO_PATH = join(__dirname, "..", "data", "cities.geo.json");
+const OVERRIDES_PATH = join(__dirname, "..", "data", "cities.geo.overrides.json");
 const OUT_PATH = join(__dirname, "..", "data", "cities.generated.json");
 
 const TRANSLIT = {
@@ -84,9 +85,25 @@ function main() {
     }
   }
 
+  // Hand-curated overrides win over geocoder output. Used for historical
+  // renamings the public geocoders don't resolve (Бомбей → Mumbai, etc).
+  let overridden = 0;
+  if (existsSync(OVERRIDES_PATH)) {
+    const overrides = JSON.parse(readFileSync(OVERRIDES_PATH, "utf8"));
+    for (const c of cities) {
+      const o = overrides[c.slug];
+      if (o && typeof o.lat === "number" && typeof o.lon === "number") {
+        if (c.lat === null) withGeo++;
+        c.lat = o.lat;
+        c.lon = o.lon;
+        overridden++;
+      }
+    }
+  }
+
   writeFileSync(OUT_PATH, JSON.stringify(cities, null, 0) + "\n");
   console.log(
-    `Wrote ${cities.length} cities to ${OUT_PATH} (${withGeo} with coordinates)`,
+    `Wrote ${cities.length} cities to ${OUT_PATH} (${withGeo} with coordinates, ${overridden} hand-overridden)`,
   );
 }
 
