@@ -2,6 +2,7 @@ import { signal, type Signal } from "@preact/signals";
 import {
   pack,
   unpack,
+  parseStateValue,
   type State,
   STATE_KEY,
   SHARD_PREFIX,
@@ -12,6 +13,20 @@ const LS_PREFIX = "lebedev-places:";
 const DEBOUNCE_MS = 300;
 const MAX_RETRY = 3;
 const BACKOFF_MS = [500, 2000, 5000];
+// Hard ceiling on a single CloudStorage round-trip. Older Telegram clients
+// and some platforms silently drop the response postMessage; without this the
+// splash hangs forever.
+const CS_CALL_TIMEOUT_MS = 4000;
+
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    p.then(
+      (v) => { clearTimeout(t); resolve(v); },
+      (e) => { clearTimeout(t); reject(e); },
+    );
+  });
+}
 
 export type SaveStatus = "idle" | "saving" | "error" | "saved";
 
@@ -142,13 +157,27 @@ class CloudStorageAdapter implements StorageAdapter {
 
   async load(cityCount: number): Promise<State> {
     try {
-      const stateRaw = await csGet(this.cs, STATE_KEY);
+      const stateRaw = await withTimeout(
+        csGet(this.cs, STATE_KEY),
+        CS_CALL_TIMEOUT_MS,
+        "CloudStorage.getItem",
+      );
       if (!stateRaw) return unpack(cityCount, undefined);
-      // Optimistically fetch all possible shards in one call (cheap when empty).
-      const shardKeys = Array.from({ length: MAX_SHARDS }, (_, i) => SHARD_PREFIX + i);
-      const shardValues = await csGetMany(this.cs, shardKeys);
+      // Only ask for shards when the state header advertises them; saves a
+      // round-trip for the common fresh / single-key case.
+      const parsed = parseStateValue(stateRaw);
+      if (parsed.mode !== "sharded" || parsed.shardCount === 0) {
+        return unpack(cityCount, stateRaw);
+      }
+      const shardKeys = Array.from({ length: parsed.shardCount }, (_, i) => SHARD_PREFIX + i);
+      const shardValues = await withTimeout(
+        csGetMany(this.cs, shardKeys),
+        CS_CALL_TIMEOUT_MS,
+        "CloudStorage.getItems",
+      );
       return unpack(cityCount, stateRaw, (i) => shardValues[SHARD_PREFIX + i]);
-    } catch {
+    } catch (err) {
+      console.warn("CloudStorage load failed, starting empty", err);
       return unpack(cityCount, undefined);
     }
   }
@@ -160,9 +189,17 @@ class CloudStorageAdapter implements StorageAdapter {
 
   private async flushNow(state: State) {
     const packed = pack(state);
-    await csSet(this.cs, STATE_KEY, packed.state);
+    await withTimeout(
+      csSet(this.cs, STATE_KEY, packed.state),
+      CS_CALL_TIMEOUT_MS,
+      "CloudStorage.setItem(state)",
+    );
     for (let i = 0; i < packed.shards.length; i++) {
-      await csSet(this.cs, SHARD_PREFIX + i, packed.shards[i]!);
+      await withTimeout(
+        csSet(this.cs, SHARD_PREFIX + i, packed.shards[i]!),
+        CS_CALL_TIMEOUT_MS,
+        `CloudStorage.setItem(shard ${i})`,
+      );
     }
     // Clean up unused shard keys when state shrinks back into single-key mode.
     if (packed.shards.length < MAX_SHARDS) {
@@ -170,7 +207,11 @@ class CloudStorageAdapter implements StorageAdapter {
         { length: MAX_SHARDS - packed.shards.length },
         (_, i) => SHARD_PREFIX + (packed.shards.length + i),
       );
-      await csRemoveMany(this.cs, stale);
+      await withTimeout(
+        csRemoveMany(this.cs, stale),
+        CS_CALL_TIMEOUT_MS,
+        "CloudStorage.removeItems",
+      );
     }
   }
 }
