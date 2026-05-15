@@ -42,28 +42,24 @@ type TileSpec = {
   maxZoom: number;
 };
 
+// Stadia Maps tile authentication: when no api_key query param is present,
+// requests are gated by their server-side Authorized Domains list. The site
+// owner registers shurochkin.github.io (and localhost for dev) in the Stadia
+// dashboard once; nothing client-side needs a secret.
+const STADIA_ATTRIBUTION =
+  '© <a href="https://www.stadiamaps.com/">Stadia Maps</a> · ' +
+  '© <a href="https://openmaptiles.org/">OpenMapTiles</a> · ' +
+  '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
 function tilesForTheme(): TileSpec {
   const dark = document.documentElement.dataset.theme === "dark";
-  if (dark) {
-    // Carto Dark Matter — free for non-commercial use, no API key required.
-    // We pair it with OSM in light mode rather than always-OSM to keep the
-    // map readable on a dark Telegram theme.
-    return {
-      url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      attribution:
-        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://carto.com/">Carto</a>',
-      subdomains: "abcd",
-      maxZoom: 19,
-    };
-  }
   return {
-    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution:
-      '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    // tile.openstreetmap.org no longer uses {a,b,c} subdomains — a single
-    // origin serves all tiles. Leaflet still wants a non-empty string.
+    url: dark
+      ? "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+      : "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png",
+    attribution: STADIA_ATTRIBUTION,
     subdomains: "abc",
-    maxZoom: 19,
+    maxZoom: 20,
   };
 }
 
