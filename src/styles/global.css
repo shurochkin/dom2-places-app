@@ -397,7 +397,9 @@ body {
   align-items: center;
   justify-content: center;
   padding: 16px;
-  z-index: 50;
+  /* Leaflet's panes and controls use z-index up to 800, so the modal needs
+     to sit firmly above them. */
+  z-index: 2000;
 }
 
 .modal {
@@ -503,6 +505,10 @@ body {
   flex: 1 1 auto;
   position: relative;
   min-height: 0;
+  /* `isolation` creates a stacking context that traps Leaflet's internal
+     z-indexes (panes 200-700, controls 800) so they can't paint over
+     modals or other overlay UI in the root stacking context. */
+  isolation: isolate;
 }
 
 .mapview {
