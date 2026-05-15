@@ -523,7 +523,9 @@ body {
   background: var(--tg-secondary-bg);
 }
 
-/* Style picker floating above the map (top-right corner) */
+/* Style picker floating above the map (top-right corner).
+   Leaflet's panes go up to z-index 700 and controls sit at 800 within the
+   .map-wrap stacking context, so the picker must clear that. */
 .map-style-picker {
   position: absolute;
   top: 10px;
@@ -535,7 +537,7 @@ body {
   background: color-mix(in srgb, var(--tg-bg) 88%, transparent);
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
-  z-index: 4;
+  z-index: 1000;
   max-width: 60vw;
   justify-content: flex-end;
 }
