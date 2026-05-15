@@ -18,7 +18,7 @@ export const CITIES: readonly City[] = Object.freeze(generated as City[]);
 // Build-time invariant: catches accidental shrinkage of the list when
 // regenerating the JSON. Bump LAST_KNOWN_LENGTH deliberately when adding
 // new entries.
-const LAST_KNOWN_LENGTH = 1271;
+const LAST_KNOWN_LENGTH = 1272;
 if (CITIES.length < LAST_KNOWN_LENGTH) {
   throw new Error(
     `CITIES shrank: ${CITIES.length} < ${LAST_KNOWN_LENGTH}. Append-only invariant violated.`,
