@@ -17,11 +17,32 @@ const rev = signal(0);
 let state: State = emptyState(CITY_COUNT);
 
 export type View = "list" | "map";
+export type MapStyleId = "alidade" | "carto" | "esri" | "osm";
 
 export const ready = signal(false);
 export const inTelegramSignal = signal(false);
 export const searchQuery = signal("");
 export const currentView = signal<View>("list");
+
+const MAP_STYLE_KEY = "lebedev-places:map-style";
+const VALID_STYLES: readonly MapStyleId[] = ["alidade", "carto", "esri", "osm"];
+
+function loadInitialMapStyle(): MapStyleId {
+  if (typeof localStorage === "undefined") return "alidade";
+  const s = localStorage.getItem(MAP_STYLE_KEY) as MapStyleId | null;
+  return s && VALID_STYLES.includes(s) ? s : "alidade";
+}
+
+export const mapStyle = signal<MapStyleId>(loadInitialMapStyle());
+
+export function setMapStyle(id: MapStyleId): void {
+  mapStyle.value = id;
+  try {
+    localStorage.setItem(MAP_STYLE_KEY, id);
+  } catch {
+    /* private mode etc — ignore */
+  }
+}
 
 let storage: StorageAdapter | null = null;
 export const saveStatus = computed<"idle" | "saving" | "error" | "saved">(() => {

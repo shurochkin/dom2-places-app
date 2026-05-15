@@ -6,7 +6,10 @@ import {
   compareState,
   isCityVisited,
   isFriendVisited,
+  mapStyle,
+  setMapStyle,
   toggleCity,
+  type MapStyleId,
 } from "../lib/store";
 
 type Bucket = "both" | "mine" | "friend" | "none";
@@ -59,27 +62,80 @@ type TileSpec = {
   maxZoom: number;
 };
 
-// Stadia Maps tile authentication. The api_key is baked into the bundle at
-// build time from PUBLIC_STADIA_API_KEY — it ends up in the public JS, which
-// is fine: Stadia keys are designed as client-side identifiers, and abuse
-// protection is done by configuring Authorized Domains on the key in the
-// Stadia dashboard.
+// Stadia API key is baked in at build from PUBLIC_STADIA_API_KEY. Stadia keys
+// are designed for client-side use; abuse protection comes from configuring
+// Authorized Domains on the key in the Stadia dashboard.
 const STADIA_API_KEY = import.meta.env.PUBLIC_STADIA_API_KEY ?? "";
-const STADIA_ATTRIBUTION =
-  '© <a href="https://www.stadiamaps.com/">Stadia Maps</a> · ' +
-  '© <a href="https://openmaptiles.org/">OpenMapTiles</a> · ' +
-  '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
-function tilesForTheme(): TileSpec {
-  const dark = document.documentElement.dataset.theme === "dark";
-  const style = dark ? "alidade_smooth_dark" : "alidade_smooth";
-  const suffix = STADIA_API_KEY ? `?api_key=${STADIA_API_KEY}` : "";
-  return {
-    url: `https://tiles.stadiamaps.com/tiles/${style}/{z}/{x}/{y}{r}.png${suffix}`,
-    attribution: STADIA_ATTRIBUTION,
-    subdomains: "abc",
-    maxZoom: 20,
-  };
+type StyleDef = {
+  id: MapStyleId;
+  label: string;
+  buildSpec: (dark: boolean) => TileSpec;
+};
+
+const STYLES: readonly StyleDef[] = [
+  {
+    id: "alidade",
+    label: "Alidade",
+    buildSpec: (dark) => {
+      const style = dark ? "alidade_smooth_dark" : "alidade_smooth";
+      const suffix = STADIA_API_KEY ? `?api_key=${STADIA_API_KEY}` : "";
+      return {
+        url: `https://tiles.stadiamaps.com/tiles/${style}/{z}/{x}/{y}{r}.png${suffix}`,
+        attribution:
+          '© <a href="https://www.stadiamaps.com/">Stadia Maps</a> · ' +
+          '© <a href="https://openmaptiles.org/">OpenMapTiles</a> · ' +
+          '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        subdomains: "abc",
+        maxZoom: 20,
+      };
+    },
+  },
+  {
+    id: "carto",
+    label: "Carto",
+    buildSpec: (dark) => ({
+      url: dark
+        ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        : "https://{s}.basemaps.cartocdn.com/voyager/{z}/{x}/{y}{r}.png",
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · ' +
+        '© <a href="https://carto.com/">Carto</a>',
+      subdomains: "abcd",
+      maxZoom: 19,
+    }),
+  },
+  {
+    id: "esri",
+    label: "Esri Gray",
+    buildSpec: (dark) => ({
+      url: dark
+        ? "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+        : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+      attribution:
+        'Tiles © <a href="https://www.esri.com/">Esri</a> — ' +
+        'sources: Esri, HERE, Garmin, FAO, NOAA, USGS',
+      subdomains: "",
+      maxZoom: 16,
+    }),
+  },
+  {
+    id: "osm",
+    label: "OSM",
+    buildSpec: () => ({
+      // OSM has no official dark style — same tiles in both themes.
+      url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      subdomains: "abc",
+      maxZoom: 19,
+    }),
+  },
+];
+
+function specFor(id: MapStyleId, dark: boolean): TileSpec {
+  const def = STYLES.find((s) => s.id === id) ?? STYLES[0]!;
+  return def.buildSpec(dark);
 }
 
 function applyTiles(map: L.Map, current: L.TileLayer | null, spec: TileSpec) {
@@ -102,6 +158,7 @@ export function MapView({ active }: Props) {
   const markersRef = useRef<Array<L.CircleMarker | null>>([]);
 
   const inCompare = compareState.value !== null;
+  const styleId = mapStyle.value;
   // Subscribe to the global revision counter via these reads so the component
   // re-renders when any city toggle happens — the second useEffect then
   // repaints all markers.
@@ -117,12 +174,17 @@ export function MapView({ active }: Props) {
       preferCanvas: true,
     }).setView([30, 15], 2);
     mapRef.current = map;
-    tileRef.current = applyTiles(map, null, tilesForTheme());
+    const isDark = () => document.documentElement.dataset.theme === "dark";
+    tileRef.current = applyTiles(map, null, specFor(mapStyle.value, isDark()));
 
     // Swap tile layers when Telegram flips its theme at runtime.
     const themeObserver = new MutationObserver(() => {
       if (!mapRef.current) return;
-      tileRef.current = applyTiles(mapRef.current, tileRef.current, tilesForTheme());
+      tileRef.current = applyTiles(
+        mapRef.current,
+        tileRef.current,
+        specFor(mapStyle.value, isDark()),
+      );
     });
     themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -163,6 +225,13 @@ export function MapView({ active }: Props) {
     }
   });
 
+  // Swap the tile layer when the user picks a different basemap style.
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const isDark = document.documentElement.dataset.theme === "dark";
+    tileRef.current = applyTiles(mapRef.current, tileRef.current, specFor(styleId, isDark));
+  }, [styleId]);
+
   // When the tab becomes active, Leaflet may have measured a 0-height
   // container — kick it to recalculate.
   useEffect(() => {
@@ -171,5 +240,24 @@ export function MapView({ active }: Props) {
     return () => cancelAnimationFrame(id);
   }, [active]);
 
-  return <div ref={containerRef} class="mapview" />;
+  return (
+    <>
+      <div ref={containerRef} class="mapview" />
+      <div class="map-style-picker" role="radiogroup" aria-label="Стиль карты">
+        {STYLES.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            class="map-style-picker__btn"
+            data-active={styleId === s.id ? "1" : "0"}
+            role="radio"
+            aria-checked={styleId === s.id}
+            onClick={() => setMapStyle(s.id)}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+    </>
+  );
 }
