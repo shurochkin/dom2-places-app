@@ -42,10 +42,12 @@ type TileSpec = {
   maxZoom: number;
 };
 
-// Stadia Maps tile authentication: when no api_key query param is present,
-// requests are gated by their server-side Authorized Domains list. The site
-// owner registers shurochkin.github.io (and localhost for dev) in the Stadia
-// dashboard once; nothing client-side needs a secret.
+// Stadia Maps tile authentication. The api_key is baked into the bundle at
+// build time from PUBLIC_STADIA_API_KEY — it ends up in the public JS, which
+// is fine: Stadia keys are designed as client-side identifiers, and abuse
+// protection is done by configuring Authorized Domains on the key in the
+// Stadia dashboard.
+const STADIA_API_KEY = import.meta.env.PUBLIC_STADIA_API_KEY ?? "";
 const STADIA_ATTRIBUTION =
   '© <a href="https://www.stadiamaps.com/">Stadia Maps</a> · ' +
   '© <a href="https://openmaptiles.org/">OpenMapTiles</a> · ' +
@@ -53,10 +55,10 @@ const STADIA_ATTRIBUTION =
 
 function tilesForTheme(): TileSpec {
   const dark = document.documentElement.dataset.theme === "dark";
+  const style = dark ? "alidade_smooth_dark" : "alidade_smooth";
+  const suffix = STADIA_API_KEY ? `?api_key=${STADIA_API_KEY}` : "";
   return {
-    url: dark
-      ? "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-      : "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png",
+    url: `https://tiles.stadiamaps.com/tiles/${style}/{z}/{x}/{y}{r}.png${suffix}`,
     attribution: STADIA_ATTRIBUTION,
     subdomains: "abc",
     maxZoom: 20,

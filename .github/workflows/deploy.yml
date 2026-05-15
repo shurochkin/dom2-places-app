@@ -30,7 +30,10 @@ jobs:
           OWNER="${GITHUB_REPOSITORY%%/*}"
           echo "SITE=https://${OWNER}.github.io" >> "$GITHUB_ENV"
           echo "BASE=/${REPO_NAME}/" >> "$GITHUB_ENV"
-      - run: npm run build
+      - name: Build
+        run: npm run build
+        env:
+          PUBLIC_STADIA_API_KEY: ${{ secrets.STADIA_API_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
