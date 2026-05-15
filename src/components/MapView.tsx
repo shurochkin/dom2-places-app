@@ -21,17 +21,34 @@ function bucketFor(idx: number, inCompare: boolean): Bucket {
   return "none";
 }
 
+// Read the palette from CSS custom properties so the map markers, the
+// header chips and the row badges stay in lockstep. Cached after first
+// resolution since the values don't change at runtime.
+let pinColors: Record<Bucket, string> | null = null;
+function getPin(bucket: Bucket): string {
+  if (!pinColors) {
+    const cs = getComputedStyle(document.documentElement);
+    pinColors = {
+      mine: cs.getPropertyValue("--pin-mine").trim() || "#2481cc",
+      friend: cs.getPropertyValue("--pin-friend").trim() || "#f59e0b",
+      both: cs.getPropertyValue("--pin-both").trim() || "#8b5cf6",
+      none: cs.getPropertyValue("--pin-none").trim() || "#9aa4ad",
+    };
+  }
+  return pinColors[bucket];
+}
+
 function styleFor(bucket: Bucket): L.CircleMarkerOptions {
   switch (bucket) {
     case "mine":
-      return { radius: 6, color: "#fff", weight: 1, fillColor: "#2481cc", fillOpacity: 0.95 };
+      return { radius: 6, color: "#fff", weight: 1, fillColor: getPin("mine"), fillOpacity: 0.95 };
     case "friend":
-      return { radius: 6, color: "#fff", weight: 1, fillColor: "#f59e0b", fillOpacity: 0.95 };
+      return { radius: 6, color: "#fff", weight: 1, fillColor: getPin("friend"), fillOpacity: 0.95 };
     case "both":
-      return { radius: 7, color: "#fff", weight: 1.5, fillColor: "#8b5cf6", fillOpacity: 1 };
+      return { radius: 7, color: "#fff", weight: 1.5, fillColor: getPin("both"), fillOpacity: 1 };
     case "none":
     default:
-      return { radius: 2.5, color: "transparent", weight: 0, fillColor: "#9aa4ad", fillOpacity: 0.55 };
+      return { radius: 2.5, color: "transparent", weight: 0, fillColor: getPin("none"), fillOpacity: 0.55 };
   }
 }
 
