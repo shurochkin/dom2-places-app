@@ -17,5 +17,6 @@
   "gyullyuk": { "lat": 37.2375, "lon": 27.5963, "note": "Güllük, Turkey; alt spelling broke matching" },
   "ylydzha": { "lat": 38.3239, "lon": 26.355, "note": "Ilıca near Çeşme, Turkey" },
   "alachaty": { "lat": 38.2718, "lon": 26.3742, "note": "Alaçatı, Turkey; resort near Çeşme" },
-  "gyumyushlyuk": { "lat": 37.0454, "lon": 27.2298, "note": "Gümüşlük, Turkey; fishing village near Bodrum" }
+  "gyumyushlyuk": { "lat": 37.0454, "lon": 27.2298, "note": "Gümüşlük, Turkey; fishing village near Bodrum" },
+  "onezhskiy-ostrov": { "lat": 62.075, "lon": 35.353, "note": "Bolshoy Klimetsky island in Lake Onega; ambiguous — Lebedev's Кижи is on the same island" }
 }
