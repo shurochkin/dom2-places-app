@@ -31,6 +31,7 @@
   "ksantos": { "lat": 36.3608, "lon": 29.3175, "note": "Xanthos, ancient Lycian city in Turkey" },
   "patara": { "lat": 36.2696, "lon": 29.3175, "note": "Patara, ancient Lycian beach in Turkey; geocoder picked a Peruvian village" },
   "tartu": { "lat": 58.3776, "lon": 26.7290, "note": "Tartu, Estonia; geocoder placed it in Syria" },
-  "noyshvanshtayn": { "lat": 47.5576, "lon": 10.7498, "note": "Neuschwanstein Castle, Schwangau, Bavaria" }
+  "noyshvanshtayn": { "lat": 47.5576, "lon": 10.7498, "note": "Neuschwanstein Castle, Schwangau, Bavaria" },
+  "vodopad-viktoriya": { "lat": -17.9243, "lon": 25.8572, "note": "Victoria Falls on the Zambezi, Zambia/Zimbabwe border" }
 }
 
