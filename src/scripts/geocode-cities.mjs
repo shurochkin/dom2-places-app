@@ -48,7 +48,7 @@ async function searchOnce(name, language) {
   url.searchParams.set("language", language);
   url.searchParams.set("format", "json");
   try {
-    const r = await fetch(url, { headers: { "user-agent": "lebedev-places/0.1" } });
+    const r = await fetch(url, { headers: { "user-agent": "dom2-places/0.1" } });
     if (!r.ok) return [];
     const data = await r.json();
     return data.results ?? [];

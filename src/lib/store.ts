@@ -24,7 +24,7 @@ export const inTelegramSignal = signal(false);
 export const searchQuery = signal("");
 export const currentView = signal<View>("list");
 
-const MAP_STYLE_KEY = "lebedev-places:map-style";
+const MAP_STYLE_KEY = "dom2-places:map-style";
 const VALID_STYLES: readonly MapStyleId[] = ["alidade", "carto", "esri", "osm"];
 
 function loadInitialMapStyle(): MapStyleId {

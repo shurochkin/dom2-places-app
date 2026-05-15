@@ -1,6 +1,8 @@
-# Места Лебедева
+# Дом-2 Places
 
-Telegram Mini App для отметок городов из «рейтинга интересности» Артемия Лебедева. Каждый пользователь видит свой прогресс (N из 1181), отмечает посещённые города чекбоксом и может указать год посещения. Данные хранятся в `Telegram.WebApp.CloudStorage` (привязано к user_id Telegram, без своего бэкенда).
+Telegram Mini App для отметок мест проекта «Дом-2». Каждый пользователь видит свой прогресс, отмечает посещённые места чекбоксом и может указать год посещения. Данные хранятся в `Telegram.WebApp.CloudStorage` (привязано к user_id Telegram, без своего бэкенда).
+
+> Форк [lebedev-places-app](https://github.com/shurochkin/lebedev-places-app) — та же архитектура, другой набор мест.
 
 ## Стек
 
@@ -16,7 +18,7 @@ npm install
 npm run dev
 ```
 
-Сайт откроется на `http://localhost:4321/lebedev-places/`. Вне Telegram приложение работает в режиме fallback: отметки хранятся в `localStorage`, видна подсказка «откройте в Telegram». Это рабочий режим для разработки.
+Сайт откроется на `http://localhost:4321/dom2-places/`. Вне Telegram приложение работает в режиме fallback: отметки хранятся в `localStorage`, видна подсказка «откройте в Telegram». Это рабочий режим для разработки.
 
 ## Парсинг списка городов
 
@@ -36,7 +38,7 @@ npm run build:cities
 
 1. `/newbot` — задать имя и username (с суффиксом `bot`). Сохранить HTTP API-токен (на будущее, если появится свой бэк).
 2. `/mybots` → выбрать бота → **Bot Settings** → **Menu Button**:
-   - URL: `https://<your-username>.github.io/lebedev-places/`
+   - URL: `https://<your-username>.github.io/dom2-places/`
    - Caption: «Открыть».
 3. `/setdomain` → указать хост без схемы (`<your-username>.github.io`). Нужен для корректной работы initData.
 4. (Опционально) `/setdescription`, `/setabouttext`, `/setuserpic`.

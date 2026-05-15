@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { buildShareCode, stats } from "../lib/store";
 import {
+  BOT_USERNAME,
   getUserFirstName,
   shareViaTelegram,
   writeClipboard,
@@ -16,8 +17,8 @@ export function ShareDialog({ onClose }: Props) {
 
   const code = buildShareCode(name.trim() || null);
   const message =
-    `Я отметил ${s.visited} из ${s.total} городов в рейтинге Лебедева. ` +
-    `Сравним?\n\nОткрой @lebedev_places_bot, нажми «Сравнить» — код подхватится автоматически.\n\n${code}`;
+    `Я отметил ${s.visited} из ${s.total} мест. ` +
+    `Сравним?\n\nОткрой @${BOT_USERNAME}, нажми «Сравнить» — код подхватится автоматически.\n\n${code}`;
 
   useEffect(() => {
     taRef.current?.focus();

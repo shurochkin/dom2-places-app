@@ -49,7 +49,7 @@ export type TelegramHandle = {
   setClosingConfirmation(enable: boolean): void;
 };
 
-export const BOT_USERNAME = "lebedev_places_bot";
+export const BOT_USERNAME = "dom2_places_bot";
 
 export function getUserFirstName(): string | null {
   return globalThis.window?.Telegram?.WebApp?.initDataUnsafe?.user?.first_name ?? null;

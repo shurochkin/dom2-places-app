@@ -9,7 +9,7 @@ import {
   MAX_SHARDS,
 } from "./encoding";
 
-const LS_PREFIX = "lebedev-places:";
+const LS_PREFIX = "dom2-places:";
 const DEBOUNCE_MS = 300;
 const MAX_RETRY = 3;
 const BACKOFF_MS = [500, 2000, 5000];
