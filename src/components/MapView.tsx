@@ -35,17 +35,14 @@ function styleFor(bucket: Bucket): L.CircleMarkerOptions {
   }
 }
 
-function tileUrlForTheme(): { url: string; attribution: string } {
-  const theme = document.documentElement.dataset.theme;
-  if (theme === "dark") {
-    return {
-      url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/">Carto</a>',
-    };
-  }
+function osmTiles(): { url: string; attribution: string; subdomains: string } {
   return {
-    url: "https://{s}.basemaps.cartocdn.com/voyager/{z}/{x}/{y}{r}.png",
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/">Carto</a>',
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution:
+      '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    // tile.openstreetmap.org no longer uses {a,b,c} subdomains — a single
+    // origin serves all tiles. Leaflet still wants a non-empty string.
+    subdomains: "abc",
   };
 }
 
@@ -74,11 +71,11 @@ export function MapView({ active }: Props) {
       attributionControl: true,
       preferCanvas: true,
     }).setView([30, 15], 2);
-    const tt = tileUrlForTheme();
+    const tt = osmTiles();
     const tile = L.tileLayer(tt.url, {
       attribution: tt.attribution,
-      maxZoom: 18,
-      subdomains: "abcd",
+      maxZoom: 19,
+      subdomains: tt.subdomains,
     }).addTo(map);
     mapRef.current = map;
     tileRef.current = tile;
@@ -98,24 +95,7 @@ export function MapView({ active }: Props) {
     }
     markersRef.current = markers;
 
-    // Re-pick tiles if the Telegram theme flips dark/light at runtime.
-    const themeObserver = new MutationObserver(() => {
-      if (!tileRef.current || !mapRef.current) return;
-      tileRef.current.remove();
-      const next = tileUrlForTheme();
-      tileRef.current = L.tileLayer(next.url, {
-        attribution: next.attribution,
-        maxZoom: 18,
-        subdomains: "abcd",
-      }).addTo(mapRef.current);
-    });
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme"],
-    });
-
     return () => {
-      themeObserver.disconnect();
       map.remove();
       mapRef.current = null;
       tileRef.current = null;
