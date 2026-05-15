@@ -28,12 +28,20 @@ if (!listPath) {
 
 const cities = JSON.parse(readFileSync(CITIES_PATH, "utf8"));
 
+// Aliases for friend-list spellings that point at an existing canonical entry
+// (avoids adding redundant cities just because of a spelling variant).
+const NAME_ALIASES = {
+  "ростов великий": "ростов",
+  "переяславль-залесский": "переславль-залесский",
+};
+
 function normalize(s) {
-  return s
+  const lower = s
     .toLowerCase()
     .replace(/ё/g, "е")
     .replace(/\s+/g, " ")
     .trim();
+  return NAME_ALIASES[lower] ?? lower;
 }
 
 // Build name → candidates index. We deliberately do NOT strip hyphens or
