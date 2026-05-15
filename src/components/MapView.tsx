@@ -3,12 +3,14 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { CITIES } from "../data/cities";
 import {
+  compareFilters,
   compareState,
   isCityVisited,
   isFriendVisited,
   mapStyle,
   setMapStyle,
   toggleCity,
+  type CompareBucket,
   type MapStyleId,
 } from "../lib/store";
 
@@ -41,7 +43,15 @@ function getPin(bucket: Bucket): string {
   return pinColors[bucket];
 }
 
-function styleFor(bucket: Bucket): L.CircleMarkerOptions {
+const HIDDEN_STYLE: L.CircleMarkerOptions = {
+  radius: 0,
+  opacity: 0,
+  fillOpacity: 0,
+  weight: 0,
+};
+
+function styleFor(bucket: Bucket, hidden = false): L.CircleMarkerOptions {
+  if (hidden) return HIDDEN_STYLE;
   switch (bucket) {
     case "mine":
       return { radius: 6, color: "#fff", weight: 1, fillColor: getPin("mine"), fillOpacity: 0.95 };
@@ -159,6 +169,7 @@ export function MapView({ active }: Props) {
 
   const inCompare = compareState.value !== null;
   const styleId = mapStyle.value;
+  const filters = compareFilters.value;
   // Subscribe to the global revision counter via these reads so the component
   // re-renders when any city toggle happens — the second useEffect then
   // repaints all markers.
@@ -216,12 +227,18 @@ export function MapView({ active }: Props) {
   }, []);
 
   // Repaint markers on every render (cheap setStyle), so toggling a city in
-  // the list view immediately reflects on the map and vice versa.
+  // the list view immediately reflects on the map and vice versa, and so
+  // toggling a bucket filter hides/shows the right pins.
   useEffect(() => {
     for (let i = 0; i < markersRef.current.length; i++) {
       const m = markersRef.current[i];
       if (!m) continue;
-      m.setStyle(styleFor(bucketFor(i, inCompare)));
+      const bucket = bucketFor(i, inCompare);
+      const hidden =
+        inCompare &&
+        bucket !== "none" &&
+        !filters.has(bucket as CompareBucket);
+      m.setStyle(styleFor(bucket, hidden));
     }
   });
 

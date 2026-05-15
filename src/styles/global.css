@@ -385,6 +385,35 @@ body {
   color: var(--tg-text);
 }
 
+/* Toggleable chips: act as visibility filters for the map. */
+.chip--toggleable {
+  border: 1px solid transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: inherit;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.chip--toggleable[data-on="0"] {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--tg-hint) 40%, transparent);
+  color: var(--tg-hint);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--tg-hint) 60%, transparent);
+}
+
+.chip--toggleable[data-on="0"] strong {
+  color: var(--tg-hint);
+}
+
+.header__compare-hint {
+  color: var(--tg-hint);
+  font-size: 12px;
+  font-weight: 400;
+}
+
 /* Row in compare mode */
 .row[data-friend="1"][data-visited="0"] {
   background: color-mix(in srgb, var(--pin-friend) 8%, transparent);

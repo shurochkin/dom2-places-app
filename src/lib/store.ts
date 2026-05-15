@@ -164,6 +164,23 @@ export function exitCompareMode(): void {
   });
 }
 
+// Per-bucket visibility for the map view in compare mode. Toggled via the
+// chips in HeaderBar; transient UI state, not persisted.
+export type CompareBucket = "mine" | "friend" | "both";
+const ALL_BUCKETS: CompareBucket[] = ["mine", "friend", "both"];
+export const compareFilters = signal<Set<CompareBucket>>(new Set(ALL_BUCKETS));
+
+export function isBucketVisible(b: CompareBucket): boolean {
+  return compareFilters.value.has(b);
+}
+
+export function toggleBucketVisible(b: CompareBucket): void {
+  const next = new Set(compareFilters.value);
+  if (next.has(b)) next.delete(b);
+  else next.add(b);
+  compareFilters.value = next;
+}
+
 // Watch for save status changes to drive the closing-confirmation flag.
 // The caller (telegram bootstrap) passes a setter; storing it here avoids
 // circular module imports.

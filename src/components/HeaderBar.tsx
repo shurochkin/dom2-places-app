@@ -1,4 +1,5 @@
 import {
+  compareFilters,
   compareName,
   compareState,
   compareStats,
@@ -7,6 +8,8 @@ import {
   saveStatus,
   searchQuery,
   stats,
+  toggleBucketVisible,
+  type CompareBucket,
 } from "../lib/store";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -15,6 +18,25 @@ const STATUS_LABEL: Record<string, string> = {
   saved: "сохранено",
   error: "ошибка сохранения",
 };
+
+function FilterChip({
+  bucket,
+  label,
+  value,
+}: { bucket: CompareBucket; label: string; value: number }) {
+  const on = compareFilters.value.has(bucket);
+  return (
+    <button
+      type="button"
+      class={`chip chip--${bucket} chip--toggleable`}
+      aria-pressed={on}
+      data-on={on ? "1" : "0"}
+      onClick={() => toggleBucketVisible(bucket)}
+    >
+      {label}: <strong>{value}</strong>
+    </button>
+  );
+}
 
 type Props = {
   onShare: () => void;
@@ -77,17 +99,14 @@ export function HeaderBar({ onShare, onCompare }: Props) {
         <div class="header__compare">
           <div class="header__compare-title">
             Сравнение с {friendName ?? "другом"} ({cmp.friendTotal} / {s.total})
+            {view === "map" ? (
+              <span class="header__compare-hint"> · нажмите, чтобы скрыть на карте</span>
+            ) : null}
           </div>
           <div class="header__compare-row">
-            <span class="chip chip--both">
-              Общие: <strong>{cmp.common}</strong>
-            </span>
-            <span class="chip chip--mine">
-              Только я: <strong>{cmp.onlyMine}</strong>
-            </span>
-            <span class="chip chip--friend">
-              Только друг: <strong>{cmp.onlyFriend}</strong>
-            </span>
+            <FilterChip bucket="both" label="Общие" value={cmp.common} />
+            <FilterChip bucket="mine" label="Только я" value={cmp.onlyMine} />
+            <FilterChip bucket="friend" label="Только друг" value={cmp.onlyFriend} />
             <button
               type="button"
               class="btn btn--ghost btn--sm"
