@@ -1,8 +1,8 @@
 import { defineConfig } from "astro/config";
 import preact from "@astrojs/preact";
 
-const SITE = process.env.SITE ?? "https://shurochkin.github.io";
-const BASE = process.env.BASE ?? "/dom2-places-app/";
+const SITE = process.env.SITE ?? "https://myname.github.io";
+const BASE = process.env.BASE ?? "/some-places/";
 
 export default defineConfig({
   site: SITE,
