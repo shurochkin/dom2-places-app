@@ -19,5 +19,11 @@
   "alachaty": { "lat": 38.2718, "lon": 26.3742, "note": "Alaçatı, Turkey; resort near Çeşme" },
   "gyumyushlyuk": { "lat": 37.0454, "lon": 27.2298, "note": "Gümüşlük, Turkey; fishing village near Bodrum" },
   "onezhskiy-ostrov": { "lat": 62.075, "lon": 35.353, "note": "Bolshoy Klimetsky island in Lake Onega; ambiguous — Lebedev's Кижи is on the same island" },
-  "lopskiy-ostrov": { "lat": 64.2275, "lon": 35.9308, "note": "Лопский ostrov in the Onega Bay of the White Sea, near Беломорск" }
+  "lopskiy-ostrov": { "lat": 64.2275, "lon": 35.9308, "note": "Лопский ostrov in the Onega Bay of the White Sea, near Беломорск" },
+  "belomoro-baltiyskiy-kanal": { "lat": 62.852, "lon": 34.832, "note": "Pinned to Повенец, the southern (Lake Onega) entrance of the canal" },
+  "kumludzha": { "lat": 36.3719, "lon": 30.2956, "note": "Kumluca, Turkey" },
+  "seldzhuk-efes": { "lat": 37.9498, "lon": 27.3686, "note": "Selçuk, the modern town next to Ephesus ruins" },
+  "bosdzhaada": { "lat": 39.8333, "lon": 26.0333, "note": "Bozcaada (Tenedos), Turkish island in the Aegean" },
+  "troya": { "lat": 39.9576, "lon": 26.2389, "note": "Troy archaeological site, Turkey; geocoder picked Troy, Michigan" }
 }
+
