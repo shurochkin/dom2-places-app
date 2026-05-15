@@ -6,5 +6,9 @@
   "seliger": { "lat": 57.2, "lon": 33.0, "note": "Lake Seliger, Tverskaya oblast; geocoder returned a Svalbard point" },
   "ples": { "lat": 57.4606, "lon": 41.5092, "note": "Плёс on the Volga, Ivanovo oblast; geocoder picked Plesetsk by population" },
   "rostov": { "lat": 57.1857, "lon": 39.4147, "note": "Ростов Великий, Yaroslavl oblast — Ростов-на-Дону is the separate rostov-na-donu entry" },
-  "echmiadzin": { "lat": 40.1612, "lon": 44.2939, "note": "Echmiadzin (Vagharshapat); Soviet-era name still in common use" }
+  "echmiadzin": { "lat": 40.1612, "lon": 44.2939, "note": "Echmiadzin (Vagharshapat); Soviet-era name still in common use" },
+  "amalfi": { "lat": 40.634, "lon": 14.6027, "note": "Amalfi, Italy; geocoder returned a Colombian village" },
+  "alaniya": { "lat": 36.5434, "lon": 31.9985, "note": "Alanya, Turkey; alt spelling of Аланья" },
+  "kemer": { "lat": 36.6019, "lon": 30.5605, "note": "Kemer, Turkey; geocoder picked Kemerovo by population" },
+  "datcha": { "lat": 36.733, "lon": 27.685, "note": "Datça, Turkey; alt Cyrillic spelling of Дача" }
 }
