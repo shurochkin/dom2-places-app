@@ -3,5 +3,6 @@
   "saygon": { "lat": 10.8231, "lon": 106.6297, "note": "Saigon → Ho Chi Minh City" },
   "kalkutta": { "lat": 22.5726, "lon": 88.3639, "note": "Calcutta → Kolkata; Open-Meteo returns a Kerala village otherwise" },
   "kanton": { "lat": 23.1291, "lon": 113.2644, "note": "Canton → Guangzhou (Lebedev's historical naming)" },
-  "seliger": { "lat": 57.2, "lon": 33.0, "note": "Lake Seliger, Tverskaya oblast; geocoder returned a Svalbard point" }
+  "seliger": { "lat": 57.2, "lon": 33.0, "note": "Lake Seliger, Tverskaya oblast; geocoder returned a Svalbard point" },
+  "ples": { "lat": 57.4606, "lon": 41.5092, "note": "Плёс on the Volga, Ivanovo oblast; geocoder picked Plesetsk by population" }
 }
