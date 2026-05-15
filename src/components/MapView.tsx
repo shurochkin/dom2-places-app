@@ -35,7 +35,27 @@ function styleFor(bucket: Bucket): L.CircleMarkerOptions {
   }
 }
 
-function osmTiles(): { url: string; attribution: string; subdomains: string } {
+type TileSpec = {
+  url: string;
+  attribution: string;
+  subdomains: string;
+  maxZoom: number;
+};
+
+function tilesForTheme(): TileSpec {
+  const dark = document.documentElement.dataset.theme === "dark";
+  if (dark) {
+    // Carto Dark Matter — free for non-commercial use, no API key required.
+    // We pair it with OSM in light mode rather than always-OSM to keep the
+    // map readable on a dark Telegram theme.
+    return {
+      url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://carto.com/">Carto</a>',
+      subdomains: "abcd",
+      maxZoom: 19,
+    };
+  }
   return {
     url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     attribution:
@@ -43,7 +63,17 @@ function osmTiles(): { url: string; attribution: string; subdomains: string } {
     // tile.openstreetmap.org no longer uses {a,b,c} subdomains — a single
     // origin serves all tiles. Leaflet still wants a non-empty string.
     subdomains: "abc",
+    maxZoom: 19,
   };
+}
+
+function applyTiles(map: L.Map, current: L.TileLayer | null, spec: TileSpec) {
+  if (current) current.remove();
+  return L.tileLayer(spec.url, {
+    attribution: spec.attribution,
+    maxZoom: spec.maxZoom,
+    subdomains: spec.subdomains,
+  }).addTo(map);
 }
 
 type Props = {
@@ -71,14 +101,18 @@ export function MapView({ active }: Props) {
       attributionControl: true,
       preferCanvas: true,
     }).setView([30, 15], 2);
-    const tt = osmTiles();
-    const tile = L.tileLayer(tt.url, {
-      attribution: tt.attribution,
-      maxZoom: 19,
-      subdomains: tt.subdomains,
-    }).addTo(map);
     mapRef.current = map;
-    tileRef.current = tile;
+    tileRef.current = applyTiles(map, null, tilesForTheme());
+
+    // Swap tile layers when Telegram flips its theme at runtime.
+    const themeObserver = new MutationObserver(() => {
+      if (!mapRef.current) return;
+      tileRef.current = applyTiles(mapRef.current, tileRef.current, tilesForTheme());
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
 
     const markers: Array<L.CircleMarker | null> = new Array(CITIES.length).fill(null);
     for (let i = 0; i < CITIES.length; i++) {
@@ -96,6 +130,7 @@ export function MapView({ active }: Props) {
     markersRef.current = markers;
 
     return () => {
+      themeObserver.disconnect();
       map.remove();
       mapRef.current = null;
       tileRef.current = null;
