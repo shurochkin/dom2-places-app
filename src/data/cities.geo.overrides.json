@@ -24,6 +24,7 @@
   "kumludzha": { "lat": 36.3719, "lon": 30.2956, "note": "Kumluca, Turkey" },
   "seldzhuk-efes": { "lat": 37.9498, "lon": 27.3686, "note": "Selçuk, the modern town next to Ephesus ruins" },
   "bosdzhaada": { "lat": 39.8333, "lon": 26.0333, "note": "Bozcaada (Tenedos), Turkish island in the Aegean" },
-  "troya": { "lat": 39.9576, "lon": 26.2389, "note": "Troy archaeological site, Turkey; geocoder picked Troy, Michigan" }
+  "troya": { "lat": 39.9576, "lon": 26.2389, "note": "Troy archaeological site, Turkey; geocoder picked Troy, Michigan" },
+  "armutlu": { "lat": 40.5167, "lon": 28.8242, "note": "Armutlu, Yalova, Turkey; geocoder picked the Armenian Armutlu" }
 }
 
