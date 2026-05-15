@@ -176,7 +176,7 @@ export function parseStateValue(raw: string): Unpacked {
 // delimiter is unambiguous; mask: same base64url bitmask used in CloudStorage;
 // years: same idx36:yroff36 csv as the storage format.
 
-export const SHARE_PREFIX = "lbdv1.";
+export const SHARE_PREFIX = "dom2v1.";
 
 export function encodeShareCode(state: State, name?: string | null): string {
   const mask = b64urlEncode(state.visited);

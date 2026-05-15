@@ -28,9 +28,11 @@ const MAP_STYLE_KEY = "dom2-places:map-style";
 const VALID_STYLES: readonly MapStyleId[] = ["alidade", "carto", "esri", "osm"];
 
 function loadInitialMapStyle(): MapStyleId {
-  if (typeof localStorage === "undefined") return "alidade";
+  // Carto is the default in dom2-places — its tiles work without an API key,
+  // so the deploy is functional even before STADIA_API_KEY lands in CI.
+  if (typeof localStorage === "undefined") return "carto";
   const s = localStorage.getItem(MAP_STYLE_KEY) as MapStyleId | null;
-  return s && VALID_STYLES.includes(s) ? s : "alidade";
+  return s && VALID_STYLES.includes(s) ? s : "carto";
 }
 
 export const mapStyle = signal<MapStyleId>(loadInitialMapStyle());
