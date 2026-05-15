@@ -10,5 +10,12 @@
   "amalfi": { "lat": 40.634, "lon": 14.6027, "note": "Amalfi, Italy; geocoder returned a Colombian village" },
   "alaniya": { "lat": 36.5434, "lon": 31.9985, "note": "Alanya, Turkey; alt spelling of Аланья" },
   "kemer": { "lat": 36.6019, "lon": 30.5605, "note": "Kemer, Turkey; geocoder picked Kemerovo by population" },
-  "datcha": { "lat": 36.733, "lon": 27.685, "note": "Datça, Turkey; alt Cyrillic spelling of Дача" }
+  "datcha": { "lat": 36.733, "lon": 27.685, "note": "Datça, Turkey; alt Cyrillic spelling of Дача" },
+  "kash": { "lat": 36.2014, "lon": 29.6396, "note": "Kaş, Turkey; geocoder picked a Chinese town" },
+  "nisiros": { "lat": 36.586, "lon": 27.163, "note": "Nisyros, Greek island in the Dodecanese" },
+  "kos": { "lat": 36.8939, "lon": 27.2879, "note": "Kos, Greek island; geocoder returned a Costa Rican village" },
+  "gyullyuk": { "lat": 37.2375, "lon": 27.5963, "note": "Güllük, Turkey; alt spelling broke matching" },
+  "ylydzha": { "lat": 38.3239, "lon": 26.355, "note": "Ilıca near Çeşme, Turkey" },
+  "alachaty": { "lat": 38.2718, "lon": 26.3742, "note": "Alaçatı, Turkey; resort near Çeşme" },
+  "gyumyushlyuk": { "lat": 37.0454, "lon": 27.2298, "note": "Gümüşlük, Turkey; fishing village near Bodrum" }
 }
