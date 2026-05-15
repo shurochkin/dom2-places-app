@@ -84,6 +84,16 @@ export function HeaderBar({ onShare, onCompare }: Props) {
         >
           Карта
         </button>
+        <button
+          type="button"
+          class="tab"
+          data-active={view === "friends" ? "1" : "0"}
+          role="tab"
+          aria-selected={view === "friends"}
+          onClick={() => (currentView.value = "friends")}
+        >
+          Друзья
+        </button>
       </div>
       {view === "list" ? (
         <input

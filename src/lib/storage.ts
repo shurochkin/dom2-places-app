@@ -35,6 +35,15 @@ export interface StorageAdapter {
   save(state: State): Promise<void>;
   readonly status: Signal<SaveStatus>;
   readonly inTelegram: boolean;
+
+  // Raw KV access (used by the friends layer). All keys must respect
+  // Telegram's [A-Za-z0-9_-]{1,128} restriction and values stay under 4096
+  // chars per key.
+  getRaw(key: string): Promise<string | undefined>;
+  getMany(keys: string[]): Promise<Record<string, string>>;
+  setRaw(key: string, value: string): Promise<void>;
+  removeRaw(key: string): Promise<void>;
+  removeMany(keys: string[]): Promise<void>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -187,6 +196,24 @@ class CloudStorageAdapter implements StorageAdapter {
     return Promise.resolve();
   }
 
+  getRaw(key: string): Promise<string | undefined> {
+    return withTimeout(csGet(this.cs, key), CS_CALL_TIMEOUT_MS, `CloudStorage.getItem(${key})`);
+  }
+  getMany(keys: string[]): Promise<Record<string, string>> {
+    if (keys.length === 0) return Promise.resolve({});
+    return withTimeout(csGetMany(this.cs, keys), CS_CALL_TIMEOUT_MS, "CloudStorage.getItems");
+  }
+  setRaw(key: string, value: string): Promise<void> {
+    return withTimeout(csSet(this.cs, key, value), CS_CALL_TIMEOUT_MS, `CloudStorage.setItem(${key})`);
+  }
+  removeRaw(key: string): Promise<void> {
+    return withTimeout(csRemoveMany(this.cs, [key]), CS_CALL_TIMEOUT_MS, `CloudStorage.removeItem(${key})`);
+  }
+  removeMany(keys: string[]): Promise<void> {
+    if (keys.length === 0) return Promise.resolve();
+    return withTimeout(csRemoveMany(this.cs, keys), CS_CALL_TIMEOUT_MS, "CloudStorage.removeItems");
+  }
+
   private async flushNow(state: State) {
     const packed = pack(state);
     await withTimeout(
@@ -247,6 +274,31 @@ class LocalStorageAdapter implements StorageAdapter {
   save(state: State): Promise<void> {
     this.writer.schedule(state);
     return Promise.resolve();
+  }
+
+  async getRaw(key: string): Promise<string | undefined> {
+    try { return localStorage.getItem(LS_PREFIX + key) ?? undefined; } catch { return undefined; }
+  }
+  async getMany(keys: string[]): Promise<Record<string, string>> {
+    const out: Record<string, string> = {};
+    for (const k of keys) {
+      try {
+        const v = localStorage.getItem(LS_PREFIX + k);
+        if (v != null) out[k] = v;
+      } catch { /* ignore */ }
+    }
+    return out;
+  }
+  async setRaw(key: string, value: string): Promise<void> {
+    try { localStorage.setItem(LS_PREFIX + key, value); } catch { /* ignore */ }
+  }
+  async removeRaw(key: string): Promise<void> {
+    try { localStorage.removeItem(LS_PREFIX + key); } catch { /* ignore */ }
+  }
+  async removeMany(keys: string[]): Promise<void> {
+    for (const k of keys) {
+      try { localStorage.removeItem(LS_PREFIX + k); } catch { /* ignore */ }
+    }
   }
 
   private async flushNow(state: State) {

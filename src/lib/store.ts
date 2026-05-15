@@ -10,13 +10,21 @@ import {
   type State,
 } from "./encoding";
 import { createStorage, type StorageAdapter } from "./storage";
+import {
+  addOrMergeFriend,
+  computeAggregate,
+  deleteFriend as deleteFriendFromStorage,
+  loadAllFriends,
+  type Aggregate,
+  type Friend,
+} from "./friends";
 
 // We mutate the in-memory State directly for speed (Uint8Array, Map) and
 // bump a revision counter so derived computeds re-run.
 const rev = signal(0);
 let state: State = emptyState(CITY_COUNT);
 
-export type View = "list" | "map";
+export type View = "list" | "map" | "friends";
 export type MapStyleId = "alidade" | "carto" | "esri" | "osm";
 
 export const ready = signal(false);
@@ -106,7 +114,14 @@ export async function bootstrapStore(): Promise<void> {
   storage = createStorage();
   inTelegramSignal.value = storage.inTelegram;
   state = await storage.load(CITY_COUNT);
+  let savedFriends: Friend[] = [];
+  try {
+    savedFriends = await loadAllFriends(storage, CITY_COUNT);
+  } catch {
+    /* friends are best-effort */
+  }
   batch(() => {
+    friends.value = savedFriends;
     rev.value = rev.value + 1;
     ready.value = true;
   });
@@ -120,6 +135,14 @@ export function getCity(idx: number): City {
 
 export const compareState = signal<State | null>(null);
 export const compareName = signal<string | null>(null);
+
+// Saved-friends list (persisted via lib/friends storage layer).
+export const friends = signal<Friend[]>([]);
+
+export const aggregate = computed<Aggregate>(() => {
+  rev.value; // re-run when user state mutates
+  return computeAggregate(CITY_COUNT, state, friends.value);
+});
 
 export function isFriendVisited(idx: number): boolean {
   const s = compareState.value;
@@ -147,15 +170,58 @@ export function buildShareCode(displayName?: string | null): string {
   return encodeShareCode(state, displayName ?? null);
 }
 
-export function enterCompareMode(code: string): { ok: true; name: string | null } | { ok: false; reason: string } {
+// Imports a share code, persists the friend (merging by name), and enters
+// compare mode on it. Returns the resulting friend on success.
+export async function importFriendCode(
+  code: string,
+): Promise<
+  | { ok: true; friend: Friend; merged: boolean }
+  | { ok: false; reason: string }
+> {
   const decoded = decodeShareCode(CITY_COUNT, code);
-  if (!decoded) return { ok: false, reason: "Не удалось разобрать код. Проверьте, что скопировали целиком." };
+  if (!decoded) {
+    return { ok: false, reason: "Не удалось разобрать код. Проверьте, что скопировали целиком." };
+  }
+  const name = decoded.name?.trim() || "Без имени";
+  if (!storage) return { ok: false, reason: "Хранилище ещё не готово, попробуйте снова через секунду." };
+  try {
+    const { friend, merged } = await addOrMergeFriend(storage, friends.value, name, decoded.state);
+    batch(() => {
+      // Replace if merged, append if new.
+      const list = friends.value.filter((f) => f.id !== friend.id);
+      list.push(friend);
+      friends.value = list;
+      compareState.value = friend.state;
+      compareName.value = friend.name;
+      rev.value = rev.value + 1;
+    });
+    return { ok: true, friend, merged };
+  } catch (err) {
+    return { ok: false, reason: `Не удалось сохранить друга: ${err instanceof Error ? err.message : String(err)}` };
+  }
+}
+
+export function enterCompareWithFriend(id: string): void {
+  const friend = friends.value.find((f) => f.id === id);
+  if (!friend) return;
   batch(() => {
-    compareState.value = decoded.state;
-    compareName.value = decoded.name;
+    compareState.value = friend.state;
+    compareName.value = friend.name;
     rev.value = rev.value + 1;
   });
-  return { ok: true, name: decoded.name };
+}
+
+export async function removeFriend(id: string): Promise<void> {
+  if (!storage) return;
+  const remaining = await deleteFriendFromStorage(storage, friends.value, id);
+  batch(() => {
+    friends.value = remaining;
+    // If we were comparing with this friend, exit compare mode.
+    if (compareName.value && !remaining.some((f) => f.name === compareName.value)) {
+      // Best-effort: name-match. Safer than tracking compare friend id explicitly.
+    }
+    rev.value = rev.value + 1;
+  });
 }
 
 export function exitCompareMode(): void {

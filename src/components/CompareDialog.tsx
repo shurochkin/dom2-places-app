@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { enterCompareMode } from "../lib/store";
+import { importFriendCode } from "../lib/store";
 import { readClipboard } from "../lib/telegram";
 import { SHARE_PREFIX } from "../lib/encoding";
 
@@ -10,6 +10,7 @@ export function CompareDialog({ onClose }: Props) {
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [autoFilled, setAutoFilled] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -30,7 +31,7 @@ export function CompareDialog({ onClose }: Props) {
     };
   }, []);
 
-  function submit() {
+  async function submit() {
     setError(null);
     const trimmed = value.trim();
     if (!trimmed) {
@@ -39,7 +40,9 @@ export function CompareDialog({ onClose }: Props) {
     }
     const start = trimmed.indexOf(SHARE_PREFIX);
     const code = start >= 0 ? trimmed.slice(start).split(/\s/, 1)[0]! : trimmed;
-    const result = enterCompareMode(code);
+    setBusy(true);
+    const result = await importFriendCode(code);
+    setBusy(false);
     if (!result.ok) {
       setError(result.reason);
       return;
@@ -70,13 +73,22 @@ export function CompareDialog({ onClose }: Props) {
         ) : null}
         {error ? <div class="modal__error">{error}</div> : null}
         <div class="modal__actions">
-          <button type="button" class="btn btn--primary" onClick={submit}>
-            Сравнить
+          <button
+            type="button"
+            class="btn btn--primary"
+            onClick={submit}
+            disabled={busy}
+          >
+            {busy ? "Сохраняем…" : "Сравнить"}
           </button>
-          <button type="button" class="btn btn--ghost" onClick={onClose}>
+          <button type="button" class="btn btn--ghost" onClick={onClose} disabled={busy}>
             Отмена
           </button>
         </div>
+        <p class="modal__hint">
+          Друг сохранится в списке «Друзья» — туда можно будет вернуться
+          без повторной вставки кода.
+        </p>
       </div>
     </div>
   );

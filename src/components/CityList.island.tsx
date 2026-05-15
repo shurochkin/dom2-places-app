@@ -13,6 +13,7 @@ import { CityRow } from "./CityRow";
 import { ShareDialog } from "./ShareDialog";
 import { CompareDialog } from "./CompareDialog";
 import { MapView } from "./MapView";
+import { FriendsView } from "./FriendsView";
 
 const ROW_HEIGHT = 56;
 const OVERSCAN = 6;
@@ -89,7 +90,7 @@ export function CityList() {
       <div
         ref={scrollerRef}
         class="scroller"
-        style={view === "map" ? { display: "none" } : undefined}
+        style={view === "list" ? undefined : { display: "none" }}
         onScroll={(e) => setScrollTop((e.target as HTMLElement).scrollTop)}
       >
         {total === 0 ? (
@@ -112,9 +113,12 @@ export function CityList() {
           </div>
         )}
       </div>
-      <div class="map-wrap" style={view === "list" ? { display: "none" } : undefined}>
+      <div class="map-wrap" style={view === "map" ? undefined : { display: "none" }}>
         <MapView active={view === "map"} />
       </div>
+      {view === "friends" ? (
+        <FriendsView onAddFriend={() => setCompareOpen(true)} />
+      ) : null}
     </div>
   );
 }

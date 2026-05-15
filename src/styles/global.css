@@ -626,3 +626,140 @@ body {
   color: var(--tg-text) !important;
   border-bottom-color: color-mix(in srgb, var(--tg-hint) 25%, transparent) !important;
 }
+
+/* Friends view */
+.friends {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.friends__aggregate {
+  background: var(--tg-secondary-bg);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.friends__agg-title {
+  font-size: 13px;
+  color: var(--tg-hint);
+  margin-bottom: 10px;
+}
+
+.friends__agg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.friends__agg-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: var(--tg-bg);
+  border-radius: 8px;
+}
+
+.friends__agg-num {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--tg-accent);
+  line-height: 1.2;
+}
+
+.friends__agg-lbl {
+  font-size: 12px;
+  color: var(--tg-text);
+}
+
+.friends__agg-sub {
+  font-size: 11px;
+  color: var(--tg-hint);
+}
+
+.friends__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.friends__empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--tg-hint);
+  font-size: 14px;
+  background: var(--tg-secondary-bg);
+  border-radius: 12px;
+}
+
+.friend {
+  display: flex;
+  align-items: stretch;
+  background: var(--tg-secondary-bg);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.friend__main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  color: var(--tg-text);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.friend__name {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.friend__meta {
+  font-size: 12px;
+  color: var(--tg-hint);
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.friend__date { font-size: 11px; }
+
+.friend__delete {
+  flex: 0 0 auto;
+  width: 44px;
+  background: transparent;
+  border: none;
+  border-left: 1px solid color-mix(in srgb, var(--tg-hint) 20%, transparent);
+  color: var(--tg-destructive);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.friend__delete:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.friends__footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
