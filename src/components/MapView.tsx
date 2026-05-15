@@ -52,16 +52,19 @@ const HIDDEN_STYLE: L.CircleMarkerOptions = {
 
 function styleFor(bucket: Bucket, hidden = false): L.CircleMarkerOptions {
   if (hidden) return HIDDEN_STYLE;
+  // Leaflet's setStyle merges, so every field that the HIDDEN_STYLE touched
+  // (opacity, weight) must be reset explicitly here — otherwise toggling a
+  // bucket back on leaves opacity at 0 and the white stroke vanishes.
   switch (bucket) {
     case "mine":
-      return { radius: 6, color: "#fff", weight: 1, fillColor: getPin("mine"), fillOpacity: 0.95 };
+      return { radius: 6, color: "#fff", weight: 1, opacity: 1, fillColor: getPin("mine"), fillOpacity: 0.95 };
     case "friend":
-      return { radius: 6, color: "#fff", weight: 1, fillColor: getPin("friend"), fillOpacity: 0.95 };
+      return { radius: 6, color: "#fff", weight: 1, opacity: 1, fillColor: getPin("friend"), fillOpacity: 0.95 };
     case "both":
-      return { radius: 7, color: "#fff", weight: 1.5, fillColor: getPin("both"), fillOpacity: 1 };
+      return { radius: 7, color: "#fff", weight: 1.5, opacity: 1, fillColor: getPin("both"), fillOpacity: 1 };
     case "none":
     default:
-      return { radius: 2.5, color: "transparent", weight: 0, fillColor: getPin("none"), fillOpacity: 0.55 };
+      return { radius: 2.5, color: "transparent", weight: 0, opacity: 0, fillColor: getPin("none"), fillOpacity: 0.55 };
   }
 }
 
